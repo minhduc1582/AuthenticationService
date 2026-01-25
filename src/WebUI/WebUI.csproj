@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+	<ClientAppDir>..\Web</ClientAppDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AuthenticationAPI.ServiceDefaults\AuthenticationAPI.ServiceDefaults.csproj" />
+	<ReactBuildFiles Include="$(ClientAppDir)\build\**\*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\AuthenticationAPI.AppHost\appsettings.Development.json" Link="appsettings.Development.json"  CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\AuthenticationAPI.AppHost\appsettings.json" Link="appsettings.json"  CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+	<Target Name="BuildReact" BeforeTargets="PrepareForBuild">
+		<Exec WorkingDirectory="$(ClientAppDir)" Command="npm install" />
+		<Exec WorkingDirectory="$(ClientAppDir)" Command="npm run build" />
+	</Target>
+
+	<Target Name="CopyViteDist" AfterTargets="PrepareForBuild">
+		<RemoveDir Directories="wwwroot" />
+		<MakeDir Directories="wwwroot" />
+
+		<ItemGroup>
+			<ViteFiles Include="$(ClientAppDir)\dist\**\*" />
+		</ItemGroup>
+
+		<Copy SourceFiles="@(ViteFiles)" DestinationFiles="@(ViteFiles->'wwwroot\%(RecursiveDir)%(Filename)%(Extension)')" />
+	</Target>
+
+</Project>
