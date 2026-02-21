@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <Content Include="..\AuthenticationAPI.AppHost\appsettings.Development.json" Link="appsettings.Development.json" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="..\AuthenticationAPI.AppHost\appsettings.json" Link="appsettings.json" CopyToOutputDirectory="PreserveNewest"/>
+    <Content Include="..\AuthenticationAPI.AppHost\appsettings.json" Link="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
@@ -16,13 +16,12 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="OpenIddict.AspNetCore" Version="7.2.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Application\Application.csproj" />
     <ProjectReference Include="..\AuthenticationAPI.ServiceDefaults\AuthenticationAPI.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

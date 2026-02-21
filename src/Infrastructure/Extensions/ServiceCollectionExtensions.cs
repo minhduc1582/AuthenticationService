@@ -1,4 +1,10 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Application.Interfaces;
+using Application.Options;
+using Infrastructure.Auth;
+using Infrastructure.Auth.Secrets;
+using Infrastructure.Auth.Tokens;
+using Infrastructure.Persistence.Repositories;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -15,29 +21,28 @@ namespace Infrastructure
             builder.Configuration.AddJsonFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"appsettings.{CurrentEnvironment()}.json"), true, false);
 
             var services = builder.Services;
+            services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
+
             // DbContext
             services.AddDbContext<AuthDbContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-                options.UseOpenIddict();
             });
 
-            services.AddOpenIddict()
-            // Register the OpenIddict core components.
-            .AddCore(options =>
-            {
-                // Configure OpenIddict to use the Entity Framework Core stores and models.
-                // Note: call ReplaceDefaultEntities() to replace the default entities.
-                options.UseEntityFrameworkCore()
-                       .UseDbContext<AuthDbContext>();
-            });
-
-            services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
+            services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
             {
                 options.User.RequireUniqueEmail = true;
             })
             .AddEntityFrameworkStores<AuthDbContext>()
             .AddDefaultTokenProviders();
+
+            services.AddHttpContextAccessor();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
+            services.AddScoped<IAppRegistrationRepository, AppRegistrationRepository>();
+            services.AddScoped<IScopeRepository, ScopeRepository>();
+            services.AddScoped<IClientSecretGenerator, ClientSecretGenerator>();
+            services.AddScoped<IClientSecretHasher, ClientSecretHasher>();
+            services.AddScoped<IJwtTokenService, JwtTokenService>();
 
             return services;
         }
