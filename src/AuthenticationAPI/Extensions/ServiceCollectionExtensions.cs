@@ -1,4 +1,8 @@
-﻿namespace AuthenticationAPI
+﻿using System.Security.Claims;
+using Application.Authorization;
+using Microsoft.AspNetCore.Identity;
+
+namespace AuthenticationAPI
 {
     public static class ServiceCollectionExtensions
     {
@@ -6,40 +10,23 @@
             this IServiceCollection services,
             IConfiguration configuration)
         {
-            services.AddOpenIddict()
-                .AddServer(options =>
+            services.AddAuthentication(options =>
                 {
-                    // Enable the token endpoint.
-                    options.SetAuthorizationEndpointUris("/connect/authorize")
-                           .SetTokenEndpointUris("/connect/token")
-                           .SetUserInfoEndpointUris("/connect/userinfo")
-                           .SetEndSessionEndpointUris("/connect/endsession");
+                    options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
+                    options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
+                    options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
+                });
 
-                    // Enable the client credentials flow.
-                    options.AllowClientCredentialsFlow()
-                            .AllowAuthorizationCodeFlow()
-                            .RequireProofKeyForCodeExchange();
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy(AuthorizationPolicies.RequireAdminRole,
+                    policy => policy.RequireRole(RoleNames.Admin));
 
-                    // Register the signing and encryption credentials.
-                    options.AddDevelopmentEncryptionCertificate()
-                           .AddDevelopmentSigningCertificate();
-
-                    // Register the ASP.NET Core host and configure the ASP.NET Core options.
-                    options.UseAspNetCore()
-                            .EnableAuthorizationEndpointPassthrough()
-                            .EnableEndSessionEndpointPassthrough()
-                            .EnableTokenEndpointPassthrough();
-                })
-                .AddValidation(options =>
-                 {
-                     options.UseLocalServer();
-                     options.UseAspNetCore();
-                 });
-
-
-            /// Service Dependencies Injection
-            
-
+                options.AddPolicy(AuthorizationPolicies.ManageUsers,
+                    policy => policy.RequireAssertion(context =>
+                        context.User.IsInRole(RoleNames.Admin) ||
+                        context.User.HasClaim("permission", "manage_users")));
+            });
 
             return services;
         }

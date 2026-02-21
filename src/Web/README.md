@@ -1,16 +1,21 @@
-# React + Vite
+# Authentication Console (React + Vite)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This Vite app now serves as a lightweight console for interacting with the authentication API. It lets you log in, log out, and verify redirect behavior while persisting the issued JWT inside an HttpOnly cookie.
 
-Currently, two official plugins are available:
+## Getting Started
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```bash
+cd src/Web
+npm install
+npm run dev
+```
 
-## React Compiler
+By default the client targets `https://as.shareservice.com:7229/api`. Override this by defining an environment variable in `.env.local`:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```
+VITE_AUTH_API_BASE_URL=https://as.shareservice.com:7229/api
+```
 
-## Expanding the ESLint configuration
+When calling the API from the browser, make sure you are using `fetch`/XHR with `credentials: 'include'` so that cookies issued by the server are stored and sent automatically.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+> **Note:** The authentication cookie is scoped to the `https://as.shareservice.com:7229` origin. If you call the API directly via `https://localhost:7194`, the browser will treat it as a different site and omit the cookie, resulting in 401 responses. Use a hosts entry or reverse proxy so local requests continue to flow through `as.shareservice.com`.
